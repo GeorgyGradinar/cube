@@ -107,9 +107,9 @@ function handleMoveUpdate() {
     currentFrame = resultFrame.value; // now show the final frame
   } else {
     currentFrame = 6;
-    // Matter.Events.off(engine, 'afterUpdate', handleMoveUpdate);
+    Matter.Events.off(engine, 'afterUpdate', handleMoveUpdate);
   }
-  // isRolling.value = false;
+  isRolling.value = false;
 }
 
 function updateSprite() {
