@@ -9,10 +9,233 @@ import Matter from 'matter-js'
 const { Engine, Render, Runner, World, Bodies, Body, Events } = Matter;
 const diceContainer = ref(null)
 
+const infoSprites = {
+  1: {
+    left: {
+      from: 0,
+      to: 4
+    },
+    right: {
+      from: 5,
+      to: 9
+    },
+    center: 5,
+  },
+  2: {
+    left: {
+      from: 80,
+      to: 84
+    },
+    right: {
+      from: 85,
+      to: 89
+    },
+    center: 85,
+  },
+  3: {
+    left: {
+      from: 100,
+      to: 104
+    },
+    right: {
+      from: 105,
+      to: 109
+    },
+    center: 105,
+  },
+  4: {
+    left: {
+      from: 70,
+      to: 74
+    },
+    right: {
+      from: 75,
+      to: 79
+    },
+    center: 75,
+  },
+  5: {
+    left: {
+      from: 120,
+      to: 124
+    },
+    right: {
+      from: 125,
+      to: 129
+    },
+    center: 125,
+  },
+  6: {
+    left: {
+      from: 60,
+      to: 64
+    },
+    right: {
+      from: 65,
+      to: 69
+    },
+    center: 65,
+  },
+  7: {
+    left: {
+      from: 110,
+      to: 114
+    },
+    right: {
+      from: 115,
+      to: 119
+    },
+    center: 115,
+  },
+  8: {
+    left: {
+      from: 50,
+      to: 54
+    },
+    right: {
+      from: 55,
+      to: 59
+    },
+    center: 55,
+  },
+  9: {
+    left: {
+      from: 155,
+      to: 159
+    },
+    right: {
+      from: 160,
+      to: 164
+    },
+    center: 160,
+  },
+  10: {
+    left: {
+      from: 90,
+      to: 94
+    },
+    right: {
+      from: 95,
+      to: 99
+    },
+    center: 95,
+  },
+  11: {
+    left: {
+      from: 10,
+      to: 14
+    },
+    right: {
+      from: 15,
+      to: 19
+    },
+    center: 15,
+  },
+  12: {
+    left: {
+      from: 40,
+      to: 44
+    },
+    right: {
+      from: 45,
+      to: 49
+    },
+    center: 45,
+  },
+  13: {
+    left: {
+      from: 145,
+      to: 149
+    },
+    right: {
+      from: 150,
+      to: 154
+    },
+    center: 150,
+  },
+  14: {
+    left: {
+      from: 175,
+      to: 179
+    },
+    right: {
+      from: 180,
+      to: 184
+    },
+    center: 180,
+  },
+  15: {
+    left: {
+      from: 135,
+      to: 139
+    },
+    right: {
+      from: 140,
+      to: 144
+    },
+    center: 140,
+  },
+  16: {
+    left: {
+      from: 165,
+      to: 169
+    },
+    right: {
+      from: 170,
+      to: 174
+    },
+    center: 170,
+  },
+  17: {
+    left: {
+      from: 30,
+      to: 34
+    },
+    right: {
+      from: 35,
+      to: 39
+    },
+    center: 35,
+  },
+  18: {
+    left: {
+      from: 185,
+      to: 189
+    },
+    right: {
+      from: 130,
+      to: 134
+    },
+    center: 130,
+  },
+  19: {
+    left: {
+      from: 20,
+      to: 24
+    },
+    right: {
+      from: 25,
+      to: 29
+    },
+    center: 25,
+  },
+  20: {
+    left: {
+      from: 190,
+      to: 194
+    },
+    right: {
+      from: 195,
+      to: 199
+    },
+    center: 195,
+  },
+}
+
 const scale = 0.2;
 const frameCols = 5;
 const frameRows = 2;
-const originalFrameWidth = 1765 / 5;
+const originalFrameWidth = 1771 / 5;
 const originalFrameHeight = 21180 / 60;
 const frameWidth = originalFrameWidth * scale;
 const frameHeight = originalFrameHeight * scale;
@@ -56,9 +279,11 @@ onMounted(() => {
   const power = direction < -10 ? (Math.random() * (60 - 30) + 30) * -1 : Math.floor(Math.random() * 10);
   Matter.Body.setVelocity(dice, {
     x: direction, // move left (negative x)
-    y: 12, // optional upward force
+    y: 1, // optional upward force
   });
-  Matter.Body.setAngularVelocity(dice, 1);
+  Matter.Body.setAngularVelocity(dice, 0);
+  dice.angle = 0; // или другое нужное значение
+  dice.inertia = Infinity;
   Events.on(render, 'afterRender', () => handleAfterRender());
 
   Render.run(render);
@@ -102,21 +327,23 @@ function handleMoveUpdate() {
   console.log(isRolling.value)
   console.log(speed)
   console.log(angular)
-  if ((isRolling.value && speed > 0.1) || angular > 0.05) {
+  if (speed > 0.1) {
     console.log(resultFrame.value)
     currentFrame = resultFrame.value; // now show the final frame
   } else {
-    currentFrame = 6;
+    currentFrame = 99;
     Matter.Events.off(engine, 'afterUpdate', handleMoveUpdate);
   }
-  isRolling.value = false;
+  // isRolling.value = false;
 }
 
 function updateSprite() {
   if (!window.lastUpdateSpriteTime) window.lastUpdateSpriteTime = Date.now();
   const now = Date.now();
+  console.log(now - window.lastUpdateSpriteTime)
   if (now - window.lastUpdateSpriteTime >= 40) {
-    resultFrame.value = Math.floor(Math.random() * 10);
+    // resultFrame.value = Math.floor(Math.random() * 10);
+    resultFrame.value = resultFrame.value + 1;
     window.lastUpdateSpriteTime = now;
   }
 }
@@ -126,7 +353,7 @@ function moveRightToLeft() {
   isRolling.value = true;
   const power = Math.floor(Math.random() * 30) * -1;
   Matter.Body.setVelocity(dice, {
-    x: power,
+    x: 20,
     y: Math.floor(Math.random() * 30) * -1,
   });
   Matter.Body.setAngularVelocity(dice, (Math.random() - 0.5) * 2);
@@ -138,12 +365,13 @@ function getDiceBody(currentWidth) {
     friction: 0.3,
     density: 0.7,
     frictionAir: 0.02,
+    inertia: Infinity, // <--- вот это ключевое!
   });
 }
 
 function uploadSprite() {
   sprite = new Image();
-  sprite.src = '/images/dicess.png';
+  sprite.src = '/images/dices2.png';
 }
 
 onUnmounted(() => {
