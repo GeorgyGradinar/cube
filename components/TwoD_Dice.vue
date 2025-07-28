@@ -243,12 +243,16 @@ const options = { isStatic: true };
 const color = '#fdfdfd';
 
 let isRolling = ref(false)
-let resultFrame = ref(0)
+let resultFrame = ref(70)
 let dice
 let currentFrame = 0
 let engine
 let render
 let sprite
+
+let debounceTimeout = ref(null);
+let lastXPosition = ref(0);
+let lastSpeed = ref(0);
 
 onMounted(() => {
   uploadSprite();
@@ -277,9 +281,10 @@ onMounted(() => {
   World.add(engine.world, [dice, ground, leftWall, rightWall, topWall]);
   const direction = (Math.random() * (80 - 30) + 30) * -1;
   const power = direction < -10 ? (Math.random() * (60 - 30) + 30) * -1 : Math.floor(Math.random() * 10);
+
   Matter.Body.setVelocity(dice, {
-    x: direction, // move left (negative x)
-    y: 1, // optional upward force
+    x: -35, // move left (negative x)
+    y: 0, // optional upward force
   });
   Matter.Body.setAngularVelocity(dice, 0);
   dice.angle = 0; // или другое нужное значение
@@ -323,15 +328,24 @@ function handleMoveUpdate() {
   const speed = Math.hypot(dice.velocity.x, dice.velocity.y);
   const angular = Math.abs(dice.angularVelocity);
   updateSprite();
-  console.log('-------------------------')
-  console.log(isRolling.value)
-  console.log(speed)
-  console.log(angular)
+
+
+  console.log('-----------')
+  // console.log(isRolling.value)
+  // console.log(speed)
+  // console.log(angular)
+  // console.log(dice.velocity.x)
+
+  // if (lastXPosition.value > dice.velocity.x) {
+  //   console.log('left')
+  // } else {
+  //   console.log('right')
+  // }
+  currentFrame = resultFrame.value; // now show the final frame
   if (speed > 0.1) {
-    console.log(resultFrame.value)
-    currentFrame = resultFrame.value; // now show the final frame
+    // currentFrame = resultFrame.value; // now show the final frame
   } else {
-    currentFrame = 99;
+    // currentFrame = 99;
     Matter.Events.off(engine, 'afterUpdate', handleMoveUpdate);
   }
   // isRolling.value = false;
@@ -340,10 +354,34 @@ function handleMoveUpdate() {
 function updateSprite() {
   if (!window.lastUpdateSpriteTime) window.lastUpdateSpriteTime = Date.now();
   const now = Date.now();
-  console.log(now - window.lastUpdateSpriteTime)
-  if (now - window.lastUpdateSpriteTime >= 40) {
+
+  const speed = Math.hypot(dice.velocity.x, dice.velocity.y);
+
+  // Выбираем интервал в зависимости от скорости
+  let interval = speed < 10 ? speed * 100 : 10;
+  if (+speed < 5) {
+    interval = 95 - (+speed * 10)
+  } else if (+speed < 10) {
+    interval = 95 - (+speed * 5)
+  } else {
+    interval = 1
+  }
+
+  if (now - window.lastUpdateSpriteTime >= interval) {
     // resultFrame.value = Math.floor(Math.random() * 10);
-    resultFrame.value = resultFrame.value + 1;
+    if (lastXPosition.value > dice.velocity.x) {
+      resultFrame.value = resultFrame.value - 1;
+    } else {
+      resultFrame.value = resultFrame.value + 1;
+    }
+
+    if (lastSpeed.value > 1 && +speed.toFixed(2) < 1){
+      console.log('setup')
+      resultFrame.value = 189
+    }
+    lastSpeed.value = +speed.toFixed(2);
+    console.log( lastSpeed.value)
+    console.log( resultFrame.value)
     window.lastUpdateSpriteTime = now;
   }
 }
@@ -372,6 +410,14 @@ function getDiceBody(currentWidth) {
 function uploadSprite() {
   sprite = new Image();
   sprite.src = '/images/dices2.png';
+}
+
+function debounceTime(callbackFn, time) {
+  if (debounceTimeout) clearTimeout(debounceTimeout);
+
+  debounceTimeout = setTimeout(() => {
+    callbackFn();
+  }, time ? time : 200);
 }
 
 onUnmounted(() => {
