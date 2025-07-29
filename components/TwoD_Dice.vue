@@ -283,7 +283,7 @@ onMounted(() => {
   const power = direction < -10 ? (Math.random() * (60 - 30) + 30) * -1 : Math.floor(Math.random() * 10);
 
   Matter.Body.setVelocity(dice, {
-    x: -35, // move left (negative x)
+    x: -55, // move left (negative x)
     y: 0, // optional upward force
   });
   Matter.Body.setAngularVelocity(dice, 0);
