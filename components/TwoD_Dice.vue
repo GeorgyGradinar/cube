@@ -327,7 +327,7 @@ onMounted(() => {
 
   Matter.Body.setVelocity(dice, {
     x: -10, // move left (negative x)
-    y: 4, // optional upward force
+    y: 0, // optional upward force
   });
   Matter.Body.setAngularVelocity(dice, 0);
   dice.angle = 0; // или другое нужное значение
