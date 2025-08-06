@@ -10,240 +10,274 @@ const { Engine, Render, Runner, World, Bodies, Body, Events } = Matter;
 const diceContainer = ref(null)
 
 const infoSprites = {
-  1: {
-    left: {
-      from: 0,
-      to: 4
-    },
-    right: {
-      from: 5,
-      to: 9
-    },
-    center: 5,
+  center: {
+    1: 0,
+    2: 1,
+    3: 2,
+    4: 3,
+    5: 5,
+    6: 6,
+    7: 7,
+    8: 8,
+    9: 10,
+    10: 11,
+    11: 12,
+    12: 13,
+    13: 15,
+    14: 16,
+    15: 17,
+    16: 18,
+    17: 20,
+    18: 21,
+    19: 22,
+    20: 23
   },
-  2: {
-    left: {
-      from: 80,
-      to: 84
-    },
-    right: {
-      from: 85,
-      to: 89
-    },
-    center: 85,
+  '19-1': {
+    pre: [9, 3],
+    from: 25,
+    to: 28,
+    next: [7, 13],
   },
-  3: {
-    left: {
-      from: 100,
-      to: 104
-    },
-    right: {
-      from: 105,
-      to: 109
-    },
-    center: 105,
+  '1-13': {
+    pre: [19, 7],
+    from: 30,
+    to: 33,
+    next: [11, 5],
   },
-  4: {
-    left: {
-      from: 70,
-      to: 74
-    },
-    right: {
-      from: 75,
-      to: 79
-    },
-    center: 75,
+  '1-7': {
+    pre: [19, 13],
+    from: 35,
+    to: 38,
+    next: [15, 17],
   },
-  5: {
-    left: {
-      from: 120,
-      to: 124
-    },
-    right: {
-      from: 125,
-      to: 129
-    },
-    center: 125,
+  '2-12': {
+    pre: [18, 20],
+    from: 40,
+    to: 43,
+    next: [15, 10],
   },
-  6: {
-    left: {
-      from: 60,
-      to: 64
-    },
-    right: {
-      from: 65,
-      to: 69
-    },
-    center: 65,
+  '18-2': {
+    pre: [5, 4],
+    from: 45,
+    to: 48,
+    next: [12, 20],
   },
-  7: {
-    left: {
-      from: 110,
-      to: 114
-    },
-    right: {
-      from: 115,
-      to: 119
-    },
-    center: 115,
+  '2-20': {
+    pre: [18, 12],
+    from: 50,
+    to: 53,
+    next: [8, 14],
   },
-  8: {
-    left: {
-      from: 50,
-      to: 54
-    },
-    right: {
-      from: 55,
-      to: 59
-    },
-    center: 55,
+  '16-3': {
+    pre: [8, 6],
+    from: 55,
+    to: 58,
+    next: [17, 19],
   },
-  9: {
-    left: {
-      from: 155,
-      to: 159
-    },
-    right: {
-      from: 160,
-      to: 164
-    },
-    center: 160,
+  '3-17': {
+    pre: [19, 16],
+    from: 60,
+    to: 63,
+    next: [7, 10],
   },
-  10: {
-    left: {
-      from: 90,
-      to: 94
-    },
-    right: {
-      from: 95,
-      to: 99
-    },
-    center: 95,
+  '3-19': {
+    pre: [17, 16],
+    from: 65,
+    to: 68,
+    next: [1, 9],
   },
-  11: {
-    left: {
-      from: 10,
-      to: 14
-    },
-    right: {
-      from: 15,
-      to: 19
-    },
-    center: 15,
+  '11-4': {
+    pre: [13, 9],
+    from: 70,
+    to: 73,
+    next: [18, 14],
   },
-  12: {
-    left: {
-      from: 40,
-      to: 44
-    },
-    right: {
-      from: 45,
-      to: 49
-    },
-    center: 45,
+  '4-14': {
+    pre: [18, 11],
+    from: 75,
+    to: 78,
+    next: [20, 6],
   },
-  13: {
-    left: {
-      from: 145,
-      to: 149
-    },
-    right: {
-      from: 150,
-      to: 154
-    },
-    center: 150,
+  '4-18': {
+    pre: [14, 11],
+    from: 80,
+    to: 83,
+    next: [5, 2],
   },
-  14: {
-    left: {
-      from: 175,
-      to: 179
-    },
-    right: {
-      from: 180,
-      to: 184
-    },
-    center: 180,
+  '5-13': {
+    pre: [15, 18],
+    from: 85,
+    to: 88,
+    next: [1, 11],
   },
-  15: {
-    left: {
-      from: 135,
-      to: 139
-    },
-    right: {
-      from: 140,
-      to: 144
-    },
-    center: 140,
+  '5-15': {
+    pre: [13, 18],
+    from: 90,
+    to: 93,
+    next: [7, 12],
   },
-  16: {
-    left: {
-      from: 165,
-      to: 169
-    },
-    right: {
-      from: 170,
-      to: 174
-    },
-    center: 170,
+  '5-18': {
+    pre: [13, 15],
+    from: 95,
+    to: 98,
+    next: [4, 2],
   },
-  17: {
-    left: {
-      from: 30,
-      to: 34
-    },
-    right: {
-      from: 35,
-      to: 39
-    },
-    center: 35,
+  '6-9': {
+    pre: [14, 16],
+    from: 100,
+    to: 103,
+    next: [11, 19],
   },
-  18: {
-    left: {
-      from: 185,
-      to: 189
-    },
-    right: {
-      from: 130,
-      to: 134
-    },
-    center: 130,
+  '6-14': {
+    pre: [9, 16],
+    from: 105,
+    to: 108,
+    next: [4, 20],
   },
-  19: {
-    left: {
-      from: 20,
-      to: 24
-    },
-    right: {
-      from: 25,
-      to: 29
-    },
-    center: 25,
+  '16-6': {
+    pre: [8, 3],
+    from: 110,
+    to: 113,
+    next: [14, 9],
   },
-  20: {
-    left: {
-      from: 190,
-      to: 194
-    },
-    right: {
-      from: 195,
-      to: 199
-    },
-    center: 195,
+  '7-15': {
+    pre: [17, 1],
+    from: 115,
+    to: 118,
+    next: [5, 12],
   },
+  '17-7': {
+    pre: [10, 3],
+    from: 120,
+    to: 123,
+    next: [1, 15],
+  },
+  '10-8': {
+    pre: [17, 12],
+    from: 125,
+    to: 128,
+    next: [20, 16],
+  },
+  '8-16': {
+    pre: [20, 10],
+    from: 130,
+    to: 133,
+    next: [6, 3],
+  },
+  '8-20': {
+    pre: [10, 16],
+    from: 135,
+    to: 138,
+    next: [2, 14],
+  },
+  '11-9': {
+    pre: [13, 4],
+    from: 140,
+    to: 143,
+    next: [19, 6],
+  },
+  '9-19': {
+    pre: [11, 6],
+    from: 145,
+    to: 148,
+    next: [1, 3],
+  },
+  '12-10': {
+    pre: [15, 2],
+    from: 150,
+    to: 153,
+    next: [17, 8],
+  },
+  '10-17': {
+    pre: [12, 8],
+    from: 155,
+    to: 158,
+    next: [7, 3],
+  },
+  '11-13': {
+    pre: [9, 4],
+    from: 160,
+    to: 163,
+    next: [1, 5],
+  },
+  '15-12': {
+    pre: [7, 5],
+    from: 165,
+    to: 168,
+    next: [10, 2],
+  },
+  '14-20': {
+    pre: [4, 6],
+    from: 170,
+    to: 173,
+    next: [2, 8],
+  },
+  '20-8': {
+    pre: [2, 14],
+    from: 175,
+    to: 178,
+    next: [10, 16],
+  }
+}
+
+// Build bidirectional graph
+function buildGraph(info) {
+  const graph = {};
+  for (const key in info) {
+    if (key === "center") continue;
+    const [a, b] = key.split("-").map(Number);
+    if (!graph[a]) graph[a] = [];
+    if (!graph[b]) graph[b] = [];
+    graph[a].push(b);
+    graph[b].push(a);
+  }
+  return graph;
+}
+
+function findShortestPath(start, end, graph) {
+  console.log(`start - ${ start }`)
+  console.log(`end - ${ end }`)
+  const queue = [[start]];
+  const visited = new Set([start]);
+
+  while (queue.length) {
+    const path = queue.shift();
+    const node = path[path.length - 1];
+
+    if (node === end) return path;
+
+    for (const neighbor of graph[node] || []) {
+      if (!visited.has(neighbor)) {
+        visited.add(neighbor);
+        queue.push([...path, neighbor]);
+      }
+    }
+  }
+
+  return null;
+}
+
+function convertNumbersToKeys(path) {
+  const result = [];
+  for (let i = 0; i < path.length - 1; i++) {
+    const key = `${ path[i] }-${ path[i + 1] }`;
+    result.push(key);
+  }
+  return result;
 }
 
 const scale = 0.2;
 const frameCols = 5;
 const frameRows = 2;
-const originalFrameWidth = 1771 / 5;
-const originalFrameHeight = 21180 / 60;
+const originalFrameWidth = 1412 / 4;
+const originalFrameHeight = 12707 / 36;
 const frameWidth = originalFrameWidth * scale;
 const frameHeight = originalFrameHeight * scale;
 const options = { isStatic: true };
 const color = '#fdfdfd';
 
 let isRolling = ref(false)
-let resultFrame = ref(70)
+let resultFrame = ref(150)
 let dice
 let currentFrame = 0
 let engine
@@ -254,9 +288,18 @@ let debounceTimeout = ref(null);
 let lastXPosition = ref(0);
 let lastSpeed = ref(0);
 
+const graph = buildGraph(infoSprites);
+
+let numbersPath
+
+let activePathSprites = ref([]);
+
 onMounted(() => {
   uploadSprite();
-
+  numbersPath = findShortestPath(17, 18, graph);
+  console.log(convertNumbersToKeys(numbersPath))
+  foundActivePath();
+  console.log('test')
   engine = Engine.create();
   engine.world.gravity.y = 0;
   const currentWidth = window.innerWidth - 50;
@@ -283,8 +326,8 @@ onMounted(() => {
   const power = direction < -10 ? (Math.random() * (60 - 30) + 30) * -1 : Math.floor(Math.random() * 10);
 
   Matter.Body.setVelocity(dice, {
-    x: -20, // move left (negative x)
-    y: 0, // optional upward force
+    x: -10, // move left (negative x)
+    y: 4, // optional upward force
   });
   Matter.Body.setAngularVelocity(dice, 0);
   dice.angle = 0; // или другое нужное значение
@@ -295,7 +338,44 @@ onMounted(() => {
   setTimeout(() => Runner.run(Runner.create(), engine), 1000);
 
   Matter.Events.on(engine, 'afterUpdate', handleMoveUpdate);
+
+  setTimeout(() => {
+    resultFrame.value = infoSprites.center[15];
+    isRolling.value = true
+    stopMoving();
+  }, 4500)
 })
+
+function foundActivePath() {
+  console.log(numbersPath)
+  for (let mainIndex = 0; mainIndex < numbersPath.length - 1; mainIndex++) {
+
+    console.log(numbersPath[mainIndex])
+    const path = infoSprites[`${ numbersPath[mainIndex] }-${ numbersPath[mainIndex + 1] }`] || infoSprites[`${ numbersPath[mainIndex + 1] }-${ numbersPath[mainIndex] }`]
+    activePathSprites.value.push(infoSprites.center[numbersPath[mainIndex]]);
+    let index = path.from
+    for (index; index <= path.to; index++) {
+      activePathSprites.value.push(index);
+    }
+
+
+    if (infoSprites[`${ numbersPath[mainIndex] }-${ numbersPath[mainIndex + 1] }`]) {
+      if (mainIndex + 1 === numbersPath.length - 1) {
+        activePathSprites.value.push(infoSprites.center[numbersPath[mainIndex + 1]]);
+      }
+    } else {
+      if (mainIndex + 1 === numbersPath.length - 1) {
+        activePathSprites.value.push(infoSprites.center[numbersPath[mainIndex]]);
+      }
+    }
+
+    console.log(JSON.parse(JSON.stringify(activePathSprites.value)))
+    console.log('-------------')
+  }
+
+  // resultFrame.value = activePathSprites.value[0]
+  // activePathSprites.value.shift()
+}
 
 function handleAfterRender() {
 
@@ -330,7 +410,6 @@ function handleMoveUpdate() {
   updateSprite();
 
 
-  console.log('-----------')
   // console.log(isRolling.value)
   // console.log(speed)
   // console.log(angular)
@@ -367,22 +446,42 @@ function updateSprite() {
     interval = 1
   }
 
-  if (now - window.lastUpdateSpriteTime >= interval) {
+  if (isRolling.value) return;
+  if (now - window.lastUpdateSpriteTime >= 1) {
     // resultFrame.value = Math.floor(Math.random() * 10);
-    if (lastXPosition.value > dice.velocity.x) {
-      resultFrame.value = resultFrame.value - 1;
+    if (lastSpeed.value > 1 && +speed.toFixed(2) < 0.3) {
+      // resultFrame.value = 189
     } else {
-      resultFrame.value = resultFrame.value + 1;
-    }
+      const last = activePathSprites.value.length === 1 ? numbersPath[numbersPath.length - 1] : null;
 
-    if (lastSpeed.value > 1 && +speed.toFixed(2) < 1){
-      console.log('setup')
-      resultFrame.value = 189
+      if (lastXPosition.value > dice.velocity.x) {
+        // resultFrame.value = resultFrame.value - 1;
+        resultFrame.value = activePathSprites.value[activePathSprites.value.length - 1]
+        activePathSprites.value.pop()
+      } else {
+        resultFrame.value = activePathSprites.value[0]
+        activePathSprites.value.shift()
+        // resultFrame.value = resultFrame.value + 1;
+      }
+
+      console.log(resultFrame.value)
+      if (last) {
+        numbersPath = findShortestPath(last, getRandomInt(20, last), graph);
+        foundActivePath();
+      }
+
     }
     lastSpeed.value = +speed.toFixed(2);
-    console.log( lastSpeed.value)
-    console.log( resultFrame.value)
     window.lastUpdateSpriteTime = now;
+  }
+}
+
+function getRandomInt(max, instead) {
+  const number = Math.floor(Math.random() * max) + 1
+  if (number === instead) {
+    return getRandomInt(max, instead);
+  } else {
+    return number;
   }
 }
 
@@ -397,19 +496,30 @@ function moveRightToLeft() {
   Matter.Body.setAngularVelocity(dice, (Math.random() - 0.5) * 2);
 }
 
-function getDiceBody(currentWidth) {
+function stopMoving() {
+  if (dice) {
+    Matter.Body.setVelocity(dice, { x: 0, y: 0 });
+    Matter.Body.setAngularVelocity(dice, 0);
+  }
+  if (engine && engine.runner) {
+    Runner.stop(engine.runner);
+  }
+  isRolling.value = false;
+}
+
+function getDiceBody(currentWidth, air) {
   dice = Bodies.rectangle(currentWidth - 100, 200, frameWidth, frameHeight, {
     restitution: 0.8,
     friction: 0.3,
     density: 0.7,
-    frictionAir: 0.02,
+    frictionAir: air || 0,
     inertia: Infinity, // <--- вот это ключевое!
   });
 }
 
 function uploadSprite() {
   sprite = new Image();
-  sprite.src = '/images/dices2.png';
+  sprite.src = '/images/dices-new.png';
 }
 
 function debounceTime(callbackFn, time) {
