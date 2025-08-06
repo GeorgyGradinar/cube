@@ -299,7 +299,7 @@ onMounted(() => {
   numbersPath = findShortestPath(17, 18, graph);
   console.log(convertNumbersToKeys(numbersPath))
   foundActivePath();
-  console.log('test')
+
   engine = Engine.create();
   engine.world.gravity.y = 0;
   const currentWidth = window.innerWidth - 50;
