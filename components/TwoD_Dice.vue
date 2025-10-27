@@ -510,7 +510,7 @@ function stopMoving() {
 function getDiceBody(currentWidth, air) {
   dice = Bodies.rectangle(currentWidth - 100, 200, frameWidth, frameHeight, {
     restitution: 0.8,
-    friction: 0.3,
+    friction: 0.5,
     density: 0.7,
     frictionAir: air || 0,
     // inertia: Infinity, // <--- вот это ключевое!
