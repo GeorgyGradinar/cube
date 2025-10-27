@@ -522,6 +522,7 @@ function uploadSprite() {
   sprite.src = '/images/dices-new.png';
 }
 
+
 function debounceTime(callbackFn, time) {
   if (debounceTimeout) clearTimeout(debounceTimeout);
 
