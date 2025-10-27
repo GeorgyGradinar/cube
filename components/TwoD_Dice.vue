@@ -326,12 +326,12 @@ onMounted(() => {
   const power = direction < -10 ? (Math.random() * (60 - 30) + 30) * -1 : Math.floor(Math.random() * 10);
 
   Matter.Body.setVelocity(dice, {
-    x: -10, // move left (negative x)
-    y: 0, // optional upward force
+    x: -15, // move left (negative x)
+    y: 5, // optional upward force
   });
-  Matter.Body.setAngularVelocity(dice, 0);
-  dice.angle = 0; // или другое нужное значение
-  dice.inertia = Infinity;
+  // Matter.Body.setAngularVelocity(dice, 0);
+  // dice.angle = 0; // или другое нужное значение
+  // dice.inertia = Infinity;
   Events.on(render, 'afterRender', () => handleAfterRender());
 
   Render.run(render);
@@ -513,7 +513,7 @@ function getDiceBody(currentWidth, air) {
     friction: 0.3,
     density: 0.7,
     frictionAir: air || 0,
-    inertia: Infinity, // <--- вот это ключевое!
+    // inertia: Infinity, // <--- вот это ключевое!
   });
 }
 
