@@ -532,7 +532,7 @@ Branch.prototype.draw = function(ctx) {
     ctx.lineTo(point.x + rand(-jitter, jitter), point.y + rand(-jitter, jitter));
     ctx.lineWidth = 2; // Увеличил толщину линии с 1 до 2
     const alpha = this.life * 0.8; // Увеличил альфа с 0.075 до 0.4
-    ctx.strokeStyle = `hsla(${this.hue + rand(-10, 10)}, 90%, 60%, ${alpha})`; // Увеличил насыщенность с 70% до 90% и яркость с 40% до 60%
+    ctx.strokeStyle = `rgba(253, 181, 21, ${alpha})`; // Changed to #fdb515 color
     ctx.stroke();
   }
 };
