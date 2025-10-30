@@ -454,10 +454,11 @@ function handleMoveUpdate() {
     // Store original position before starting shake
     originalDicePosition = { x: dice.position.x, y: dice.position.y };
     // Start shake animation when dice stops
-    startShakeAnimation();
+
     // Trigger branch animation when dice stops
     if (!isBranchActive) {
       createBranchAnimation();
+      startShakeAnimation();
     }
   }
   // isRolling.value = false;
@@ -553,7 +554,7 @@ function createBranchAnimation() {
   // Stop animation after 1.5 seconds
   setTimeout(() => {
     stopBranchAnimation();
-  }, 1500); // Изменил с 2500 до 1500 мс для точно 1.5 секунды
+  }, 2500);
 }
 
 function drawBranches(ctx) {
