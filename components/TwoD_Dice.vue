@@ -458,7 +458,7 @@ function handleMoveUpdate() {
     // Trigger branch animation when dice stops
     if (!isBranchActive) {
       createBranchAnimation();
-      startShakeAnimation();
+      // startShakeAnimation();
     }
   }
   // isRolling.value = false;
