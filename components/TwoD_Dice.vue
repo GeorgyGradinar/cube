@@ -3,7 +3,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, onUnmounted } from 'vue'
 import Matter from 'matter-js'
 
 const { Engine, Render, Runner, World, Bodies, Body, Events } = Matter;
@@ -220,6 +220,11 @@ const infoSprites = {
   }
 }
 
+const props = defineProps({
+  endNumber: Number,
+})
+const { endNumber } = toRefs(props);
+
 // Build bidirectional graph
 function buildGraph(info) {
   const graph = {};
@@ -235,8 +240,6 @@ function buildGraph(info) {
 }
 
 function findShortestPath(start, end, graph) {
-  console.log(`start - ${ start }`)
-  console.log(`end - ${ end }`)
   const queue = [[start]];
   const visited = new Set([start]);
 
@@ -274,7 +277,7 @@ const originalFrameHeight = 12707 / 36;
 const frameWidth = originalFrameWidth * scale;
 const frameHeight = originalFrameHeight * scale;
 const options = { isStatic: true };
-const color = '#fdfdfd';
+// const color = '#fdfdfd';
 
 let isRolling = ref(false)
 let resultFrame = ref(150)
@@ -288,6 +291,24 @@ let debounceTimeout = ref(null);
 let lastXPosition = ref(0);
 let lastSpeed = ref(0);
 
+// Explosion animation variables
+let explosionParticles = [];
+let explosionAnimationId = null;
+let isExplosionActive = false;
+
+// Branch animation variables
+let branches = [];
+let branchAnimationId = null;
+let isBranchActive = false;
+let branchTick = 0;
+let startHue = 220;
+
+// Dice shake animation variables
+let isShaking = false;
+let shakeIntensity = 0; // Increased from 10 to 25
+let shakeOffset = { x: 0, y: 0 };
+let originalDicePosition = { x: 0, y: 0 };
+
 const graph = buildGraph(infoSprites);
 
 let numbersPath
@@ -297,16 +318,21 @@ let activePathSprites = ref([]);
 onMounted(() => {
   uploadSprite();
   numbersPath = findShortestPath(17, 18, graph);
-  console.log(convertNumbersToKeys(numbersPath))
   foundActivePath();
 
   engine = Engine.create();
   engine.world.gravity.y = 0;
   const currentWidth = window.innerWidth - 50;
-  const ground = Bodies.rectangle(currentWidth / 2, 400, currentWidth, 10, options);
-  const leftWall = Bodies.rectangle(0, 200, 10, 400, options);
-  const rightWall = Bodies.rectangle(currentWidth, 200, 10, 400, options);
-  const topWall = Bodies.rectangle(currentWidth / 2, 0, currentWidth, 10, options);
+
+  // Make walls much thicker and taller to prevent escape
+  const wallThickness = 50; // Increased from 10 to 50
+  const wallHeight = 600; // Increased from 400 to 600
+  const containerHeight = 400;
+
+  const ground = Bodies.rectangle(currentWidth / 2, containerHeight + wallThickness/2, currentWidth + wallThickness*2, wallThickness, options);
+  const leftWall = Bodies.rectangle(-wallThickness/2, containerHeight/2, wallThickness, wallHeight, options);
+  const rightWall = Bodies.rectangle(currentWidth + wallThickness/2, containerHeight/2, wallThickness, wallHeight, options);
+  const topWall = Bodies.rectangle(currentWidth / 2, -wallThickness/2, currentWidth + wallThickness*2, wallThickness, options);
 
   render = Render.create({
     element: diceContainer.value,
@@ -315,19 +341,18 @@ onMounted(() => {
       width: currentWidth,
       height: 400,
       wireframes: false,
-      background: color
     }
   });
 
   getDiceBody(currentWidth);
 
   World.add(engine.world, [dice, ground, leftWall, rightWall, topWall]);
-  const direction = (Math.random() * (80 - 30) + 30) * -1;
-  const power = direction < -10 ? (Math.random() * (60 - 30) + 30) * -1 : Math.floor(Math.random() * 10);
-
+  const direction = (Math.random() * (40 - 30) + 30) * -1;
+  const power = direction < -10 ? (Math.random() * (40 - 30) + 30) * -1 : Math.floor(Math.random() * 10);
+  console.log(direction)
   Matter.Body.setVelocity(dice, {
-    x: -15, // move left (negative x)
-    y: 5, // optional upward force
+    x: direction, // move left (negative x)
+    y: power, // optional upward force
   });
   // Matter.Body.setAngularVelocity(dice, 0);
   // dice.angle = 0; // или другое нужное значение
@@ -340,17 +365,15 @@ onMounted(() => {
   Matter.Events.on(engine, 'afterUpdate', handleMoveUpdate);
 
   setTimeout(() => {
-    resultFrame.value = infoSprites.center[15];
+    resultFrame.value = infoSprites.center[endNumber.value];
     isRolling.value = true
     stopMoving();
-  }, 4500)
+  }, 4500) // Сократил с 4500 до 2000 мс
 })
 
 function foundActivePath() {
-  console.log(numbersPath)
   for (let mainIndex = 0; mainIndex < numbersPath.length - 1; mainIndex++) {
 
-    console.log(numbersPath[mainIndex])
     const path = infoSprites[`${ numbersPath[mainIndex] }-${ numbersPath[mainIndex + 1] }`] || infoSprites[`${ numbersPath[mainIndex + 1] }-${ numbersPath[mainIndex] }`]
     activePathSprites.value.push(infoSprites.center[numbersPath[mainIndex]]);
     let index = path.from
@@ -368,9 +391,6 @@ function foundActivePath() {
         activePathSprites.value.push(infoSprites.center[numbersPath[mainIndex]]);
       }
     }
-
-    console.log(JSON.parse(JSON.stringify(activePathSprites.value)))
-    console.log('-------------')
   }
 
   // resultFrame.value = activePathSprites.value[0]
@@ -387,7 +407,7 @@ function handleAfterRender() {
   ctx.save();
   ctx.translate(position.x, position.y);
   ctx.rotate(angle);
-  ctx.fillStyle = color; // or any yellow color
+  // ctx.fillStyle = color; // or any yellow color
   ctx.fillRect(-frameWidth / 2 - 1, -frameHeight / 2 - 1, frameWidth + 2, frameHeight + 2);
   ctx.drawImage(
     sprite,
@@ -402,6 +422,11 @@ function handleAfterRender() {
   );
   ctx.beginPath();
   ctx.restore();
+
+  // Draw branch animation if active
+  if (isBranchActive) {
+    drawBranches(ctx);
+  }
 }
 
 function handleMoveUpdate() {
@@ -426,8 +451,154 @@ function handleMoveUpdate() {
   } else {
     // currentFrame = 99;
     Matter.Events.off(engine, 'afterUpdate', handleMoveUpdate);
+    // Store original position before starting shake
+    originalDicePosition = { x: dice.position.x, y: dice.position.y };
+    // Start shake animation when dice stops
+    startShakeAnimation();
+    // Trigger branch animation when dice stops
+    if (!isBranchActive) {
+      createBranchAnimation();
+    }
   }
   // isRolling.value = false;
+}
+
+// Branch animation functions
+function rand(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
+function randInt(min, max) {
+  return Math.floor(min + Math.random() * (max - min + 1));
+}
+
+function Branch(hue, x, y, angle, vel) {
+  const move = 15;
+  this.x = x + rand(-move, move);
+  this.y = y + rand(-move, move);
+  this.points = [];
+  this.angle = angle != undefined ? angle : rand(0, Math.PI * 1);
+  this.vel = vel != undefined ? vel : rand(-1, 1);
+  this.spread = 0;
+  this.tick = 0;
+  this.hue = hue != undefined ? hue : 200;
+  this.life = 1;
+  this.decay = 0.005; // Увеличил скорость затухания для завершения за 1.5 секунды
+  this.dead = false;
+
+  this.points.push({
+    x: this.x,
+    y: this.y
+  });
+}
+
+Branch.prototype.step = function(i) {
+  this.life -= this.decay;
+  if (this.life <= 0) {
+    this.dead = true;
+  }
+
+  if (!this.dead) {
+    const lastPoint = this.points[this.points.length - 1];
+    this.points.push({
+      x: lastPoint.x + Math.cos(this.angle) * this.vel,
+      y: lastPoint.y + Math.sin(this.angle) * this.vel
+    });
+    this.angle += rand(-this.spread, this.spread);
+    this.vel *= 0.99;
+    this.spread = this.vel * 0.04;
+    this.tick++;
+    this.hue += 0.3;
+  } else {
+    branches.splice(i, 1);
+  }
+};
+
+Branch.prototype.draw = function(ctx) {
+  if (!this.points.length || this.dead) {
+    return false;
+  }
+
+  const length = this.points.length;
+  const i = length - 1;
+  const point = this.points[i];
+  const lastPoint = this.points[i - randInt(5, 100)];
+
+  if (lastPoint) {
+    const jitter = 2 + this.life * 6;
+    ctx.beginPath();
+    ctx.moveTo(lastPoint.x, lastPoint.y);
+    ctx.lineTo(point.x + rand(-jitter, jitter), point.y + rand(-jitter, jitter));
+    ctx.lineWidth = 2; // Увеличил толщину линии с 1 до 2
+    const alpha = this.life * 0.8; // Увеличил альфа с 0.075 до 0.4
+    ctx.strokeStyle = `hsla(${this.hue + rand(-10, 10)}, 90%, 60%, ${alpha})`; // Увеличил насыщенность с 70% до 90% и яркость с 40% до 60%
+    ctx.stroke();
+  }
+};
+
+function createBranchAnimation() {
+  if (isBranchActive) return;
+
+  isBranchActive = true;
+  branches = [];
+  branchTick = 0;
+
+  const dicePos = dice.position;
+
+  // Create branches starting from dice position
+  for (let i = 0; i < 300; i++) { // Сократил количество веток с 500 до 300
+    branches.push(new Branch(startHue, dicePos.x, dicePos.y));
+  }
+
+  // Stop animation after 1.5 seconds
+  setTimeout(() => {
+    stopBranchAnimation();
+  }, 1500); // Изменил с 2500 до 1500 мс для точно 1.5 секунды
+}
+
+function drawBranches(ctx) {
+  // Step animation
+  let i = branches.length;
+  while (i--) {
+    branches[i].step(i);
+  }
+  branchTick++;
+
+  // Draw background effect (similar to original)
+  if (branchTick < 450) {
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = 0.002;
+    const centerX = render.options.width / 2;
+    const centerY = render.options.height / 2;
+    ctx.translate(centerX, centerY);
+    const scale = 1 + branchTick * 0.00025;
+    ctx.scale(scale, scale);
+    ctx.translate(-centerX, -centerY);
+    // Note: We can't use drawImage on canvas in this context, so we skip this effect
+    ctx.restore();
+  }
+
+  // Draw branches
+  ctx.globalCompositeOperation = 'lighter';
+  i = branches.length;
+  while (i--) {
+    branches[i].draw(ctx);
+  }
+
+  // Reset composite operation for dice rendering
+  ctx.globalCompositeOperation = 'source-over';
+
+  // Stop animation when no branches left
+  if (branches.length === 0) {
+    stopBranchAnimation();
+  }
+}
+
+function stopBranchAnimation() {
+  isBranchActive = false;
+  branches = [];
+  branchTick = 0;
 }
 
 function updateSprite() {
@@ -464,7 +635,6 @@ function updateSprite() {
         // resultFrame.value = resultFrame.value + 1;
       }
 
-      console.log(resultFrame.value)
       if (last) {
         numbersPath = findShortestPath(last, getRandomInt(20, last), graph);
         foundActivePath();
@@ -487,6 +657,14 @@ function getRandomInt(max, instead) {
 
 function moveRightToLeft() {
   if (isRolling.value) return;
+
+  // Check if dice is still moving - don't allow clicks when dice has stopped
+  const speed = Math.hypot(dice.velocity.x, dice.velocity.y);
+  if (speed <= 0.1) return;
+
+  // Stop any existing branch animation
+  stopBranchAnimation();
+
   isRolling.value = true;
   const power = Math.floor(Math.random() * 30) * -1;
   Matter.Body.setVelocity(dice, {
@@ -511,7 +689,7 @@ function getDiceBody(currentWidth, air) {
   dice = Bodies.rectangle(currentWidth - 100, 200, frameWidth, frameHeight, {
     restitution: 0.8,
     friction: 0.5,
-    density: 0.7,
+    density: 0.9,
     frictionAir: air || 0,
     // inertia: Infinity, // <--- вот это ключевое!
   });
@@ -519,7 +697,7 @@ function getDiceBody(currentWidth, air) {
 
 function uploadSprite() {
   sprite = new Image();
-  sprite.src = '/images/dices-new.png';
+  sprite.src = '/images/dices-new-blur-bg.png';
 }
 
 
@@ -531,7 +709,62 @@ function debounceTime(callbackFn, time) {
   }, time ? time : 200);
 }
 
+// Shake animation functions
+function startShakeAnimation() {
+  if (isShaking) return;
+  
+  isShaking = true;
+  shakeIntensity = 20; // Increased from 5 to 20
+  
+  const shakeAnimation = () => {
+    if (!isShaking || shakeIntensity <= 0.1) {
+      stopShakeAnimation();
+      return;
+    }
+    
+    // Generate random shake offset with larger range
+    shakeOffset.x = (Math.random() - 0.5) * shakeIntensity * 2; // Added multiplier of 2
+    shakeOffset.y = (Math.random() - 0.5) * shakeIntensity * 2; // Added multiplier of 2
+    
+    // Apply shake to dice position
+    Matter.Body.setPosition(dice, {
+      x: originalDicePosition.x + shakeOffset.x,
+      y: originalDicePosition.y + shakeOffset.y
+    });
+    
+    // Gradually reduce shake intensity (slower decay for longer shake)
+    shakeIntensity *= 0.98; // Changed from 0.95 to 0.98 for slower decay
+    
+    // Continue animation
+    requestAnimationFrame(shakeAnimation);
+  };
+  
+  shakeAnimation();
+  
+  // Stop shake after 2 seconds
+  setTimeout(() => {
+    stopShakeAnimation();
+  }, 2000);
+}
+
+function stopShakeAnimation() {
+  if (!isShaking) return;
+  
+  isShaking = false;
+  shakeIntensity = 0;
+  shakeOffset = { x: 0, y: 0 };
+  
+  // Reset dice to original position
+  if (dice && originalDicePosition.x && originalDicePosition.y) {
+    Matter.Body.setPosition(dice, {
+      x: originalDicePosition.x,
+      y: originalDicePosition.y
+    });
+  }
+}
+
 onUnmounted(() => {
   Matter.Events.off(engine, 'afterUpdate', handleMoveUpdate);
+  stopBranchAnimation();
 })
 </script>
