@@ -269,11 +269,11 @@ function convertNumbersToKeys(path) {
   return result;
 }
 
-const scale = 0.08;
+const scale = 0.1;
 const frameCols = 5;
 const frameRows = 2;
 const originalFrameWidth = 2824 / 4;
-const originalFrameHeight = 25414 / 36;
+const originalFrameHeight = 25416 / 36;
 const frameWidth = originalFrameWidth * scale;
 const frameHeight = originalFrameHeight * scale;
 const options = { isStatic: true };
@@ -301,7 +301,7 @@ let branches = [];
 let branchAnimationId = null;
 let isBranchActive = false;
 let branchStartTime = 0;
-let branchDuration = ref(1500); // 2.5 seconds in milliseconds
+let branchDuration = ref(2500); // 2.5 seconds in milliseconds
 let startHue = 220;
 let initialDicePosition = { x: 0, y: 0 }; // Store initial dice position when branches are created
 
@@ -322,7 +322,7 @@ let activePathSprites = ref([]);
 onMounted(() => {
   const is4K = window.innerWidth >= 3840 || window.innerHeight >= 2160;
   // FHD оставляем текущие параметры, для 4K делаем короче
-  branchDuration.value = is4K ? 1300 : 1500;
+  branchDuration.value = is4K ? 1300 : 2500;
 
   uploadSprite();
   numbersPath = findShortestPath(17, 18, graph);
@@ -512,7 +512,7 @@ function randInt(min, max) {
 }
 
 function Branch(hue, x, y, angle, vel) {
-  const move = 20;
+  const move = 10;
   this.x = x + rand(-move, move);
   this.y = y + rand(-move, move);
   this.points = [];
@@ -522,7 +522,7 @@ function Branch(hue, x, y, angle, vel) {
   this.tick = 0;
   this.hue = hue != undefined ? hue : 200;
   this.life = 1;
-  this.decay = 0.012; // Увеличил скорость затухания для завершения за 1.5 секунды
+  this.decay = 0.005; // Увеличил скорость затухания для завершения за 1.5 секунды
   this.dead = false;
 
   this.points.push({
