@@ -324,7 +324,11 @@ onMounted(() => {
   // FHD оставляем текущие параметры, для 4K делаем короче
   branchDuration.value = is4K ? 1300 : 2500;
 
-  uploadSprite();
+  // Ждём полной загрузки спрайта, затем инициализируем движок и анимации
+  uploadSprite().then(() => initAfterSpriteLoaded());
+})
+
+function initAfterSpriteLoaded() {
   numbersPath = findShortestPath(17, 18, graph);
   foundActivePath();
 
@@ -381,9 +385,6 @@ onMounted(() => {
     x: direction, // move left (negative x)
     y: power, // optional upward force
   });
-  // Matter.Body.setAngularVelocity(dice, 0);
-  // dice.angle = 0; // или другое нужное значение
-  // dice.inertia = Infinity;
   Events.on(render, 'afterRender', () => handleAfterRender());
 
   Render.run(render);
@@ -395,13 +396,12 @@ onMounted(() => {
     resultFrame.value = infoSprites.center[endNumber.value];
     isRolling.value = true
     stopMoving();
-  }, 4500) // Сократил с 4500 до 2000 мс
+  }, 4500)
 
   setTimeout(()=>{
     createBranchAnimation();
-    // startShakeAnimation();
   }, 3500)
-})
+}
 
 function foundActivePath() {
   for (let mainIndex = 0; mainIndex < numbersPath.length - 1; mainIndex++) {
@@ -744,8 +744,12 @@ function getDiceBody(currentWidth, air) {
 }
 
 function uploadSprite() {
-  sprite = new Image();
-  sprite.src = '/images/33.png';
+  return new Promise((resolve, reject) => {
+    sprite = new Image();
+    sprite.onload = () => resolve(true);
+    sprite.onerror = (e) => reject(e);
+    sprite.src = '/images/33.png';
+  });
 }
 
 
