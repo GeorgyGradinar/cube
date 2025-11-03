@@ -1,5 +1,5 @@
 <template>
-  <div ref="diceContainer" @click="moveRightToLeft" />
+    <div ref="diceContainer" @click="moveRightToLeft" />
 </template>
 
 <script setup>
@@ -269,11 +269,11 @@ function convertNumbersToKeys(path) {
   return result;
 }
 
-const scale = 0.1;
+const scale = 0.2;
 const frameCols = 5;
 const frameRows = 2;
-const originalFrameWidth = 2824 / 4;
-const originalFrameHeight = 25416 / 36;
+const originalFrameWidth = 1412 / 4;
+const originalFrameHeight = 12708 / 36;
 const frameWidth = originalFrameWidth * scale;
 const frameHeight = originalFrameHeight * scale;
 const options = { isStatic: true };
@@ -301,7 +301,7 @@ let branches = [];
 let branchAnimationId = null;
 let isBranchActive = false;
 let branchStartTime = 0;
-let branchDuration = ref(2500); // 2.5 seconds in milliseconds
+let branchDuration = ref(400); // 2.5 seconds in milliseconds
 let startHue = 220;
 let initialDicePosition = { x: 0, y: 0 }; // Store initial dice position when branches are created
 
@@ -321,9 +321,10 @@ let activePathSprites = ref([]);
 
 onMounted(() => {
   const is4K = window.innerWidth >= 3840 || window.innerHeight >= 2160;
-  // FHD оставляем текущие параметры, для 4K делаем короче
-  branchDuration.value = is4K ? 1300 : 2500;
-
+  const isMobile = Math.min(window.innerWidth, window.innerHeight) <= 768;
+  // FHD оставляем текущие параметры, для 4K короче, для мобильных ещё короче
+  branchDuration.value = isMobile ? 1000 : (is4K ? 400 : 400);
+  console.log(branchDuration.value)
   // Ждём полной загрузки спрайта, затем инициализируем движок и анимации
   uploadSprite().then(() => initAfterSpriteLoaded());
 })
@@ -400,7 +401,7 @@ function initAfterSpriteLoaded() {
 
   setTimeout(()=>{
     createBranchAnimation();
-  }, 3500)
+  }, 4200)
 }
 
 function foundActivePath() {
@@ -512,7 +513,7 @@ function randInt(min, max) {
 }
 
 function Branch(hue, x, y, angle, vel) {
-  const move = 10;
+  const move = 20;
   this.x = x + rand(-move, move);
   this.y = y + rand(-move, move);
   this.points = [];
@@ -522,7 +523,7 @@ function Branch(hue, x, y, angle, vel) {
   this.tick = 0;
   this.hue = hue != undefined ? hue : 200;
   this.life = 1;
-  this.decay = 0.005; // Увеличил скорость затухания для завершения за 1.5 секунды
+  this.decay = 0.008; // Увеличил скорость затухания для завершения за 1.5 секунды
   this.dead = false;
 
   this.points.push({
@@ -568,7 +569,7 @@ Branch.prototype.draw = function(ctx, offset = { x: 0, y: 0 }) {
     ctx.beginPath();
     ctx.moveTo(lastPoint.x + offset.x, lastPoint.y + offset.y);
     ctx.lineTo(point.x + rand(-jitter, jitter) + offset.x, point.y + rand(-jitter, jitter) + offset.y);
-    ctx.lineWidth = 2; // Увеличил толщину линии с 1 до 2
+    ctx.lineWidth = 1; // Увеличил толщину линии с 1 до 2
     const alpha = this.life * 0.8; // Увеличил альфа с 0.075 до 0.4
     ctx.strokeStyle = `rgba(253, 181, 21, ${alpha})`; // Changed to #fdb515 color
     ctx.stroke();
@@ -586,7 +587,7 @@ function createBranchAnimation() {
   initialDicePosition = { x: dicePos.x, y: dicePos.y }; // Store initial position
 
   // Create branches starting from dice position
-  for (let i = 0; i < 300; i++) { // Сократил количество веток с 500 до 300
+  for (let i = 0; i < 600; i++) { // Сократил количество веток с 500 до 300
     branches.push(new Branch(startHue, dicePos.x, dicePos.y));
   }
 
@@ -767,7 +768,7 @@ function startShakeAnimation() {
   
   isShaking = true;
   shakeStartTime = Date.now(); // Set start time
-  maxShakeIntensity = 20; // Increased from 5 to 20
+  maxShakeIntensity = 7; // Increased from 5 to 20
   
   const shakeAnimation = () => {
     if (!isShaking || (Date.now() - shakeStartTime) > shakeDuration) { // Use shakeStartTime and shakeDuration
@@ -824,3 +825,4 @@ onUnmounted(() => {
   stopBranchAnimation();
 })
 </script>
+
